@@ -10,13 +10,14 @@ import Container from 'components/Container';
 import Map from 'components/Map';
 
 import gatsby_astronaut from 'assets/images/gatsby-astronaut.jpg';
+import {getGeocord, getAreaData} from '../lib/util'
 
 const LOCATION = {
-  lat: 38.9072,
-  lng: -77.0369
+  lat: 51.1657,
+  lng: 10.4515
 };
 const CENTER = [LOCATION.lat, LOCATION.lng];
-const DEFAULT_ZOOM = 2;
+const DEFAULT_ZOOM = 4;
 const ZOOM = 10;
 
 const timeToZoom = 2000;
@@ -45,33 +46,40 @@ const IndexPage = () => {
    * @example Here this is and example of being used to zoom in and set a popup on load
    */
 
-  async function mapEffect({ leafletElement } = {}) {
-    if ( !leafletElement ) return;
+  async function mapEffect({ leafletElement: map } = {}) {
 
-    const popup = L.popup({
-      maxWidth: 800
-    });
+    // fetch covid 19 EU data 
+    // 1. fetch the countries from /countryLookup
+    const countriesRes = await fetch('https://covid19-eu-data-api-gamma.now.sh/api/countryLookup')
+    let {countries} = await countriesRes.json()
+    // countries = countries.slice(0,1)
 
-    const location = await getCurrentLocation().catch(() => LOCATION );
+    // 2. Look up the lat and lng for the countries
 
-    const { current = {} } = markerRef || {};
-    const { leafletElement: marker } = current;
+    
+    const geoJSON = await Promise.all(countries.map(async country => {
+      const alpha2 = Object.keys(country)[0]
+      const countryName = Object.values(country)[0]
+      
+      // 3. Fetch the data for each of the countries
+      const countryDataRes = await fetch(`https://covid19-eu-data-api-gamma.now.sh/api/countries?alpha2=${alpha2}&days=1`)
+      const [countryData] = await countryDataRes.json()
 
-    marker.setLatLng( location );
-    popup.setLatLng( location );
-    popup.setContent( popupContentHello );
+      // Currently Switzerland, ch, nuts_2 is in code, not actual name. e.g. ag, ai etc
+      // map them after getting the actual names
+      if(alpha2 === 'ch') return
+      const features = await Promise.all(getAreaData(countryData, countryName))
+      return {
+        type: 'FeatureCollection',
+        features
+      }
 
-    setTimeout( async () => {
-      await promiseToFlyTo( leafletElement, {
-        zoom: ZOOM,
-        center: location
-      });
+    }))
+    // Now we have 18 feature collections
+    console.log('geoJSON', geoJSON)
 
-      marker.bindPopup( popup );
+    // 4. Group together the countryname, alhpa2, lat lng in state
 
-      setTimeout(() => marker.openPopup(), timeToOpenPopupAfterZoom );
-      setTimeout(() => marker.setPopupContent( popupContentGatsby ), timeToUpdatePopupAfterZoom );
-    }, timeToZoom );
   }
 
   const mapSettings = {

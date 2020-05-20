@@ -23,7 +23,7 @@ module.exports = {
     }
   },
 
-  plugins: ['react', 'react-hooks','import'],
+  plugins: ['react', 'react-hooks','import','prettier'],
 
   extends: ['zurgbot', 'plugin:react/recommended','plugin:import']
 };
