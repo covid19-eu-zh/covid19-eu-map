@@ -1,7 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import Helmet from 'react-helmet';
 import L from 'leaflet';
-import { Marker } from 'react-leaflet';
+import { Marker, GeoJSON } from 'react-leaflet';
 
 import { promiseToFlyTo, getCurrentLocation } from 'lib/map';
 
@@ -37,8 +37,18 @@ const popupContentGatsby = `
   </div>
 `;
 
+function geoJSONStyle() {
+  return {
+    color: '#1f2021',
+    weight: 1,
+    fillOpacity: 0.5,
+    fillColor: '#fff2af',
+  }
+}
+
 const IndexPage = () => {
   const markerRef = useRef();
+  const [geoJSONArrays, setgeoJSONArrays] = useState([])
 
   /**
    * mapEffect
@@ -57,7 +67,7 @@ const IndexPage = () => {
     // 2. Look up the lat and lng for the countries
 
     
-    const geoJSON = await Promise.all(countries.map(async country => {
+    const geoJSONArrays = await Promise.all(countries.map(async country => {
       const alpha2 = Object.keys(country)[0]
       const countryName = Object.values(country)[0]
       
@@ -73,12 +83,16 @@ const IndexPage = () => {
         type: 'FeatureCollection',
         features
       }
-
     }))
-    // Now we have 18 feature collections
-    console.log('geoJSON', geoJSON)
+    // Now we have 18 country's feature collections
+    const truthyGeoJSONArrays = geoJSONArrays.filter(geojson => !!geojson).map(geojson => {
+      const newFeatures = geojson.features.filter(feature => !!feature)
+      return {...geojson, features: newFeatures}
+    })
+    setgeoJSONArrays(truthyGeoJSONArrays)
 
-    // 4. Group together the countryname, alhpa2, lat lng in state
+    // Plot the area pins on the map by adding a leaflet geojson layer
+
 
   }
 
@@ -97,6 +111,17 @@ const IndexPage = () => {
 
       <Map {...mapSettings}>
         <Marker ref={markerRef} position={CENTER} />
+        {geoJSONArrays && geoJSONArrays.map(geojson => (
+          <GeoJSON 
+            data={geojson}
+            style={geoJSONStyle}
+            onEachFeature={(feature, layer)=>{
+              // console.log('feature',feature)
+              // console.log('layer',layer)
+            }}
+          />
+
+        ))}
       </Map>
 
       <Container type="content" className="text-center home-start">
