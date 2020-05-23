@@ -12,6 +12,10 @@ import Map from 'components/Map';
 import gatsby_astronaut from 'assets/images/gatsby-astronaut.jpg';
 import {getGeocord, getAreaData} from '../lib/util'
 
+// Docs
+// https://leafletjs.com/reference-1.6.0.html#marker
+// https://github.com/PaulLeCam/react-leaflet/blob/master/src/GeoJSON.js
+
 const LOCATION = {
   lat: 51.1657,
   lng: 10.4515
@@ -63,10 +67,6 @@ const IndexPage = () => {
     const countriesRes = await fetch('https://covid19-eu-data-api-gamma.now.sh/api/countryLookup')
     let {countries} = await countriesRes.json()
     // countries = countries.slice(0,1)
-
-    // 2. Look up the lat and lng for the countries
-
-    
     const geoJSONArrays = await Promise.all(countries.map(async country => {
       const alpha2 = Object.keys(country)[0]
       const countryName = Object.values(country)[0]
@@ -90,9 +90,61 @@ const IndexPage = () => {
       return {...geojson, features: newFeatures}
     })
     setgeoJSONArrays(truthyGeoJSONArrays)
+  }
 
-    // Plot the area pins on the map by adding a leaflet geojson layer
+  // onEachFeature takes map layer as the 2nd arg so that we can bind popup
+  // const onEachFeature = (feature, layer) => {
+  //   const { countryName, deaths, recovered, datetime, cases, area } = feature.properties
+  //   const deathContent = deaths ? `<li><strong>Deaths:</strong> ${deaths}</li>` : ""
+  //   const recoveredContent = recovered ? `<li><strong>Recovered:</strong> ${recovered}</li>` : ""
+  //   const date = datetime.split("T")[0]
+  //   const popupContent = `
+  //   <span class="icon-marker">
+  //   <span class="icon-marker-tooltip">
+  //     <h2>${countryName}</h2>
+  //     <h2>${area}</h2>
+  //     <ul>
+  //       <li><strong>Last Update:</strong> ${date}</li>
+  //       <li><strong>Confirmed:</strong> ${cases}</li>
+  //       ${deathContent}
+  //       ${recoveredContent}
+  //     </ul>
+  //   </span>
+  // </span>
+  //    `
 
+  //   layer.bindPopup(popupContent)
+  // }
+
+  // pointToLayer takes latlng and creates a layer on that pt.
+  // L.marker is a layer
+  const pointToLayer = (feature, latlng) => {
+    console.log('latlng', latlng)
+    const { countryName, deaths, recovered, datetime, cases, area } = feature.properties
+    const deathContent = deaths ? `<li><strong>Deaths:</strong> ${deaths}</li>` : ""
+    const recoveredContent = recovered ? `<li><strong>Recovered:</strong> ${recovered}</li>` : ""
+    const date = datetime.split("T")[0]
+    const html = `
+    <span class="icon-marker">
+    <span class="icon-marker-tooltip">
+      <h2>${countryName}</h2>
+      <h2>${area}</h2>
+      <ul>
+        <li><strong>Last Update:</strong> ${date}</li>
+        <li><strong>Confirmed:</strong> ${cases}</li>
+        ${deathContent}
+        ${recoveredContent}
+      </ul>
+    </span>
+    ${cases}
+  </span>  `
+  return L.marker( latlng, {
+    icon: L.divIcon({
+      className: 'icon',
+      html
+    }),
+    riseOnHover: true
+  });  
 
   }
 
@@ -115,23 +167,11 @@ const IndexPage = () => {
           <GeoJSON 
             data={geojson}
             style={geoJSONStyle}
-            onEachFeature={(feature, layer)=>{
-              // console.log('feature',feature)
-              // console.log('layer',layer)
-            }}
+            pointToLayer={pointToLayer}
           />
 
         ))}
       </Map>
-
-      <Container type="content" className="text-center home-start">
-        <h2>Still Getting Started?</h2>
-        <p>Run the following in your terminal!</p>
-        <pre>
-          <code>gatsby new [directory] https://github.com/colbyfayock/gatsby-starter-leaflet</code>
-        </pre>
-        <p className="note">Note: Gatsby CLI required globally for the above command</p>
-      </Container>
     </Layout>
   );
 };

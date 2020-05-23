@@ -32,7 +32,7 @@ export  function getAreaData(countryData, countryName) {
       const [location] = getGeocord(nutArea)
       // filter out the ones without location
       // TODO: later, filter these ones to requery for coord
-      if (!location.lat) return null 
+      if (!location?.lat) return null 
 
       // NEXT: Transform this into GeoJSON data format
       const geoJson = {

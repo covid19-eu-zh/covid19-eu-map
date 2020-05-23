@@ -186,8 +186,8 @@ export const data = [
   },
   {
     "area": "Ecdc",
-    "lat": 36.153969,
-    "lng": -95.85480299999999
+    "lat": 49.009952,
+    "lng": -23.504453
   },
   {
     "area": "auvergne-rhône-alpes",
