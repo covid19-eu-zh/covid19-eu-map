@@ -3,14 +3,11 @@ import Helmet from 'react-helmet';
 import L from 'leaflet';
 import { Marker, GeoJSON } from 'react-leaflet';
 
-import { promiseToFlyTo, getCurrentLocation } from 'lib/map';
 
 import Layout from 'components/Layout';
-import Container from 'components/Container';
 import Map from 'components/Map';
 
-import gatsby_astronaut from 'assets/images/gatsby-astronaut.jpg';
-import {getGeocord, getAreaData} from '../lib/util'
+import { getAreaData } from '../lib/util'
 
 // Docs
 // https://leafletjs.com/reference-1.6.0.html#marker
@@ -22,24 +19,9 @@ const LOCATION = {
 };
 const CENTER = [LOCATION.lat, LOCATION.lng];
 const DEFAULT_ZOOM = 4;
-const ZOOM = 10;
 
-const timeToZoom = 2000;
-const timeToOpenPopupAfterZoom = 4000;
-const timeToUpdatePopupAfterZoom = timeToOpenPopupAfterZoom + 3000;
 
-const popupContentHello = `<p>Hello 👋</p>`;
-const popupContentGatsby = `
-  <div class="popup-gatsby">
-    <div class="popup-gatsby-image">
-      <img class="gatsby-astronaut" src=${gatsby_astronaut} />
-    </div>
-    <div class="popup-gatsby-content">
-      <h1>Gatsby Leaflet Starter</h1>
-      <p>Welcome to your new Gatsby site. Now go build something great!</p>
-    </div>
-  </div>
-`;
+
 
 function geoJSONStyle() {
   return {
@@ -60,12 +42,13 @@ const IndexPage = () => {
    * @example Here this is and example of being used to zoom in and set a popup on load
    */
 
+   // used inside the Map component to fire the function after map is loaded 
   async function mapEffect({ leafletElement: map } = {}) {
 
     // fetch covid 19 EU data 
     // 1. fetch the countries from /countryLookup
     const countriesRes = await fetch('https://covid19-eu-data-api-gamma.now.sh/api/countryLookup')
-    let {countries} = await countriesRes.json()
+    let { countries } = await countriesRes.json()
     // countries = countries.slice(0,1)
     const geoJSONArrays = await Promise.all(countries.map(async country => {
       const alpha2 = Object.keys(country)[0]
