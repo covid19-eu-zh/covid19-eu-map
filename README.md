@@ -2,6 +2,9 @@
 This is an map visualisation of the European COVID-19 data using APIS from [covid19-eu-data-api](https://github.com/covid19-eu-zh/covid19-eu-data-api)
 The map template is taken from the [FreeCodeCamp COVID19 Tutorial](https://www.freecodecamp.org/news/how-to-create-a-coronavirus-covid-19-dashboard-map-app-in-react-with-gatsby-and-leaflet/)
 
+```
+Map Link: https://covid19-eu-map.now.sh/
+```
 
 # 🍃 Gatsby Leaflet Starter
 

@@ -145,7 +145,6 @@ const IndexPage = () => {
       </Helmet>
 
       <Map {...mapSettings}>
-        <Marker ref={markerRef} position={CENTER} />
         {geoJSONArrays && geoJSONArrays.map(geojson => (
           <GeoJSON 
             data={geojson}
