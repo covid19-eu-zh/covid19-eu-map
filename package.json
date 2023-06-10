@@ -4,7 +4,7 @@
   "version": "0.2.4",
   "author": "Colby Fayock <hello@colbyfayock.com>",
   "dependencies": {
-    "gatsby": "^2.20.12",
+    "gatsby": "^4.25.7",
     "gatsby-plugin-react-helmet": "^3.2.1",
     "gatsby-plugin-react-leaflet": "2.0.12",
     "gatsby-plugin-resolve-src": "^2.0.0",
